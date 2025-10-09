@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,8 +6,18 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, User, Phone, Mail, Building, FileText, Users } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const MembershipForm = () => {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -30,8 +39,8 @@ const MembershipForm = () => {
   });
 
   const [files, setFiles] = useState({
-    idPassport: null,
-    kraPin: null
+    idPassport: null as File | null,
+    kraPin: null as File | null
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -42,11 +51,144 @@ const MembershipForm = () => {
     setFiles(prev => ({ ...prev, [field]: file }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const uploadFile = async (file: File, fileName: string) => {
+    const { data, error } = await supabase.storage
+      .from('membership-documents')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) {
+      console.error('File upload error:', error);
+      throw error;
+    }
+
+    return data.path;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form Data:', formData);
-    console.log('Files:', files);
-    // Handle form submission logic here
+    setIsSubmitting(true);
+
+    try {
+      // Validate required fields
+      if (!formData.firstName || !formData.lastName || !formData.idNumber || 
+          !formData.phoneNumber || !formData.gender || !formData.employmentType ||
+          !formData.monthlyIncome || !formData.nextOfKinFirstName || 
+          !formData.nextOfKinLastName || !formData.nextOfKinPhone) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in all required fields marked with *",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!files.idPassport) {
+        toast({
+          title: "Missing Document",
+          description: "Please upload your ID/Passport document",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Upload files
+      let idPassportUrl = '';
+      let kraPinUrl = '';
+
+      if (files.idPassport) {
+        const idFileName = `${formData.idNumber}_id_passport_${Date.now()}`;
+        idPassportUrl = await uploadFile(files.idPassport, idFileName);
+      }
+
+      if (files.kraPin) {
+        const kraFileName = `${formData.idNumber}_kra_pin_${Date.now()}`;
+        kraPinUrl = await uploadFile(files.kraPin, kraFileName);
+      }
+
+      // Submit application
+      const { error } = await supabase
+        .from('membership_applications')
+        .insert({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          id_number: formData.idNumber,
+          phone_number: formData.phoneNumber,
+          gender: formData.gender,
+          email: formData.email || null,
+          employment_type: formData.employmentType,
+          company_name: formData.companyName || null,
+          monthly_income: parseFloat(formData.monthlyIncome),
+          employers_phone: formData.employersPhone || null,
+          next_of_kin_first_name: formData.nextOfKinFirstName,
+          next_of_kin_last_name: formData.nextOfKinLastName,
+          next_of_kin_phone: formData.nextOfKinPhone,
+          relationship: formData.relationship || null,
+          referred_by_first_name: formData.referredByFirstName || null,
+          referred_by_last_name: formData.referredByLastName || null,
+          referred_by_phone: formData.referredByPhone || null,
+          id_passport_url: idPassportUrl,
+          kra_pin_url: kraPinUrl
+        });
+
+      if (error) {
+        console.error('Submission error:', error);
+        
+        if (error.code === '23505') {
+          toast({
+            title: "Application Already Exists",
+            description: "An application with this ID number already exists.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Submission Failed",
+            description: "There was an error submitting your application. Please try again.",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
+      toast({
+        title: "Application Submitted Successfully!",
+        description: "Your membership application has been submitted for review. You will be contacted once it's processed.",
+      });
+
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        idNumber: '',
+        phoneNumber: '',
+        gender: '',
+        email: '',
+        employmentType: '',
+        companyName: '',
+        monthlyIncome: '',
+        employersPhone: '',
+        nextOfKinFirstName: '',
+        nextOfKinLastName: '',
+        nextOfKinPhone: '',
+        relationship: '',
+        referredByFirstName: '',
+        referredByLastName: '',
+        referredByPhone: ''
+      });
+      setFiles({ idPassport: null, kraPin: null });
+
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Submission Failed",
+        description: "There was an error submitting your application. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -54,7 +196,7 @@ const MembershipForm = () => {
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">Membership Application</CardTitle>
-          <p className="text-gray-600 text-center">Join Billways Sacco and start your financial journey with us</p>
+          <p className="text-muted-foreground text-center">Join Billways Sacco and start your financial journey with us</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-8">
@@ -225,10 +367,10 @@ const MembershipForm = () => {
                     />
                     <div
                       onClick={() => document.getElementById('idPassport')?.click()}
-                      className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
+                      className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
                     >
-                      <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm text-gray-600">
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
                         {files.idPassport ? files.idPassport.name : 'Click to upload ID/Passport'}
                       </p>
                     </div>
@@ -247,10 +389,10 @@ const MembershipForm = () => {
                     />
                     <div
                       onClick={() => document.getElementById('kraPin')?.click()}
-                      className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
+                      className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
                     >
-                      <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm text-gray-600">
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
                         {files.kraPin ? files.kraPin.name : 'Click to upload KRA PIN'}
                       </p>
                     </div>
@@ -359,8 +501,12 @@ const MembershipForm = () => {
 
             {/* Submit Button */}
             <div className="pt-6">
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white py-3">
-                Submit Membership Application
+              <Button 
+                type="submit" 
+                className="w-full py-3"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Submitting Application..." : "Submit Membership Application"}
               </Button>
             </div>
           </form>

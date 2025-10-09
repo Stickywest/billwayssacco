@@ -39,7 +39,7 @@ const Login: React.FC = () => {
       });
 
       setTimeout(() => {
-        navigate(isAdmin ? '/admin' : '/dashboard');
+        navigate(isAdmin ? '/admin' : '/admin');
       }, 1500);
 
     } catch (error: any) {

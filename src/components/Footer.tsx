@@ -1,5 +1,7 @@
 
 import { Button } from "@/components/ui/button";
+import { HashLink as Link } from 'react-router-hash-link';
+
 
 const Footer = () => {
   return (
@@ -39,23 +41,47 @@ const Footer = () => {
             <h4 className="text-white font-bold mb-6">Quick Links</h4>
             <ul className="space-y-3">
               <li><a href="#" className="hover:text-white hover:underline transition-colors">Home</a></li>
-              <li><a href="#about" className="hover:text-white hover:underline transition-colors">About Us</a></li>
-              <li><a href="#services" className="hover:text-white hover:underline transition-colors">Services</a></li>
-              <li><a href="#" className="hover:text-white hover:underline transition-colors">Rates & Fees</a></li>
-              <li><a href="#" className="hover:text-white hover:underline transition-colors">FAQs</a></li>
-              <li><a href="#" className="hover:text-white hover:underline transition-colors">Blog</a></li>
+              <li><Link to="/about" className="hover:text-white hover:underline transition-colors">About Us</Link></li>
+              <li><Link to="/#services" className="hover:text-white hover:underline transition-colors">Services</Link></li>
+              <li><Link to="/membership" className="hover:text-white hover:underline transition-colors">Membership</Link></li>
+              <li><Link to="/faq" className="hover:text-white hover:underline transition-colors">FAQs</Link></li>
+              <li><Link to="/blog" className="hover:text-white hover:underline transition-colors">Blog</Link></li>
             </ul>
           </div>
           
           <div>
             <h4 className="text-white font-bold mb-6">Services</h4>
             <ul className="space-y-3">
-              <li><a href="#" className="hover:text-white hover:underline transition-colors">Savings Accounts</a></li>
-              <li><a href="#" className="hover:text-white hover:underline transition-colors">Personal Loans</a></li>
-              <li><a href="#" className="hover:text-white hover:underline transition-colors">Home Loans</a></li>
-              <li><a href="#" className="hover:text-white hover:underline transition-colors">Business Financing</a></li>
-              <li><a href="#" className="hover:text-white hover:underline transition-colors">Investment Options</a></li>
-              <li><a href="#" className="hover:text-white hover:underline transition-colors">Financial Education</a></li>
+              <li>
+                <Link to="/#services" className="hover:text-white hover:underline transition-colors">
+                  Savings Accounts
+                </Link>
+              </li>
+              <li>
+                <Link to="/#services" className="hover:text-white hover:underline transition-colors">
+                  Personal Loans
+                </Link>
+              </li>
+              <li>
+                <Link to="/#services" className="hover:text-white hover:underline transition-colors">
+                  Home Loans
+                </Link>
+              </li>
+              <li>
+                <Link to="/business-loan" className="hover:text-white hover:underline transition-colors">
+                  Business Financing
+                </Link>
+              </li>
+              <li>
+                <Link to="/#services" className="hover:text-white hover:underline transition-colors">
+                  Investment Options
+                </Link>
+              </li>
+              <li>
+                <Link to="/#services" className="hover:text-white hover:underline transition-colors">
+                  Financial Education
+                </Link>
+              </li>
             </ul>
           </div>
           

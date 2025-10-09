@@ -1,13 +1,15 @@
 // AdminDashboard.tsx
 import { useEffect, useState } from 'react';
-
 import { Header } from '../components/dashboard/Header';
-
 import { StatsCards } from '../components/dashboard/StatsCards';
 import { ChartsSection } from '../components/dashboard/ChartsSection';
-import { MemberManagement } from '../components/dashboard/MemberManagement';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '../lib/supabaseClient';
+import { Button } from "@/components/ui/button";
+import { FileText, Users } from "lucide-react";
+import MembershipForm from '@/components/MembershipForm';
+import MembershipApplicationsViewer from '@/components/MembershipApplicationsViewer';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type SaccoStats = {
   totalMembers: number;
@@ -16,20 +18,7 @@ type SaccoStats = {
   pendingApprovals: number;
 };
 
-type User = {
-  id: string;
-  email: string;
-  created_at: string;
-  user_metadata?: {
-    role?: string;
-    full_name?: string;
-    phone?: string;
-    sacco_id?: string;
-  };
-};
-
 export default function AdminDashboard() {
-  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<SaccoStats>({
     totalMembers: 0,
@@ -37,40 +26,12 @@ export default function AdminDashboard() {
     totalSavings: 0,
     pendingApprovals: 0
   });
+  const [activeView, setActiveView] = useState<'form' | 'applications'>('applications');
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchUsers();
     fetchStats();
   }, []);
-
-  const fetchUsers = async () => {
-    setLoading(true);
-    const { data, error } = await supabase.auth.admin.listUsers();
-    if (error) {
-      console.error('Error fetching users:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch users',
-        variant: 'destructive'
-      });
-    } else {
-      setUsers(
-        data.users.map((u: any) => ({
-          id: u.id,
-          email: u.email ?? '',
-          created_at: u.created_at,
-          user_metadata: {
-            role: u.user_metadata?.role,
-            full_name: u.user_metadata?.full_name,
-            phone: u.user_metadata?.phone,
-            sacco_id: u.user_metadata?.sacco_id,
-          },
-        }))
-      );
-    }
-    setLoading(false);
-  };
 
   const fetchStats = async () => {
     // In a real app, you would fetch these from your database
@@ -89,11 +50,39 @@ export default function AdminDashboard() {
       <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <StatsCards stats={stats} />
         <ChartsSection />
-        <MemberManagement 
-          users={users} 
-          loading={loading} 
-          refetchUsers={fetchUsers} 
-        />
+        
+        <div className="mt-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">
+                Membership Management
+              </CardTitle>
+              <Button 
+                variant="outline"
+                onClick={() => setActiveView(activeView === 'form' ? 'applications' : 'form')}
+              >
+                {activeView === 'form' ? (
+                  <>
+                    <Users className="h-4 w-4 mr-2" />
+                    View Applications
+                  </>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4 mr-2" />
+                    New Application
+                  </>
+                )}
+              </Button>
+            </CardHeader>
+            <CardContent className="pt-4">
+              {activeView === 'form' ? (
+                <MembershipForm />
+              ) : (
+                <MembershipApplicationsViewer />
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );

@@ -3,9 +3,17 @@ import axios from 'axios';
 import WhatsAppButton from "./WhatsAppButton";
 import billwaysLogo from '../assets/logo.svg';
 
+
 interface Message {
   sender: 'user' | 'bot';
   text: string;
+  quickActions?: QuickAction[];
+}
+
+interface QuickAction {
+  text: string;
+  action: 'link' | 'call' | 'question';
+  value: string;
 }
 
 interface ChatCompletion {
@@ -27,6 +35,10 @@ interface ChatCompletion {
     total_tokens: number;
   };
 }
+// Get the base URL dynamically
+const baseUrl = window.location.href.includes('github.io') 
+  ? window.location.href.split('/').slice(0, 3).join('/') + '/' + window.location.href.split('/')[3] 
+  : '';
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,14 +55,29 @@ const Chatbot = () => {
   const accentColor = '#8BC34A'; // Light green
   const textColor = '#212121'; // Dark gray
 
-  // Get API key from environment variables (works with both Vite and CRA)
+  // Get API key from environment variables
   const API_KEY = import.meta.env?.VITE_GROQ_API_KEY || process.env.REACT_APP_GROQ_API_KEY;
 
-  // Enhanced common questions fallback
-  const commonQuestions: Record<string, string> = {
-    'hello': 'Hello! Welcome to Billways Sacco. How can I assist you today?',
-    'hi': 'Hi there! How can I help you with Billways Sacco services?',
-    'membership': `Membership Requirements:
+  // Enhanced common questions with quick actions
+  const commonQuestions: Record<string, {text: string, quickActions?: QuickAction[]}> = {
+    'hello': {
+      text: 'Hello! Welcome to Billways Sacco. How can I assist you today?',
+      quickActions: [
+        { text: 'Membership', action: 'link', value: `${baseUrl}/#membership` },
+        { text: 'Loan Products', action: 'question', value: 'What loan products do you offer?' },
+        { text: 'Contact Us', action: 'call', value: '0700032800' }
+      ]
+    },
+    'hi': {
+      text: 'Hi there! How can I help you with Billways Sacco services?',
+      quickActions: [
+        { text: 'About Us', action: 'question', value: 'What is Billways Sacco?' },
+        { text: 'Savings', action: 'question', value: 'What savings products do you offer?' },
+        { text: 'Call Us', action: 'call', value: '0700032800' }
+      ]
+    },
+    'membership': {
+      text: `Membership Requirements:
 1. Copy of National ID
 2. KRA Pin certificate
 3. Membership fee: Ksh 700
@@ -58,7 +85,13 @@ const Chatbot = () => {
    - Individuals: Ksh 5,000
    - Groups: Ksh 10,000
    - Businesses: Ksh 15,000`,
-    'loan': `Available Loan Products:
+      quickActions: [
+        { text: 'Join Now', action: 'link', value: `${baseUrl}/#membership` },
+        { text: 'Contact', action: 'call', value: '0700032800' }
+      ]
+    },
+    'loan': {
+      text: `Available Loan Products:
 - Development Loan
 - School Fees Loan
 - Emergency Loan
@@ -67,28 +100,181 @@ const Chatbot = () => {
 - Boda Boda Loan
 
 Interest rates start from 12% p.a.`,
-    'saving': `Savings Products:
+      quickActions: [
+        { text: 'Apply Now', action: 'link', value:`${baseUrl}/#apply` },
+        { text: 'Loan Terms', action: 'question', value: 'What are the loan terms?' }
+      ]
+    },
+    'saving': {
+      text: `Savings Products:
 1. Fixed Deposits
 2. Junior Accounts
 3. 52 Weeks Challenge
 4. Goal Tiered Savings
 
 Earn competitive interest on your savings!`,
-    'contact': `Contact Information:
-📞 Phone: 0700032800
-📧 Email: info@billwayssacco.co.ke
-📍 Location: Langalanga Market, Room 85, Nakuru`,
-    'hours': `Working Hours:
+      quickActions: [
+        { text: 'Open Account', action: 'link', value: `${baseUrl}/#membership`},
+        { text: 'Rates', action: 'question', value: 'What are your savings rates?' }
+      ]
+    },
+    'contact': {
+      text: `Contact Information:
+Phone: 0700032800
+Email: info@billwayssacco.co.ke
+Location: Langalanga Market, Room 85, Nakuru`,
+      quickActions: [
+        { text: 'Call Now', action: 'call', value: '0700032800' },
+        { text: 'WhatsApp', action: 'link', value: 'https://wa.me/254700032800' },
+        { text: 'Email', action: 'link', value: 'mailto:info@billwayssacco.co.ke' }
+      ]
+    },
+    'hours': {
+      text: `Working Hours:
 Monday - Friday: 8:00 AM - 5:00 PM
 Saturday: 9:00 AM - 1:00 PM
-Sunday: Closed`,
-    'thanks': "You're welcome! Is there anything else I can help you with?",
-    'help': `How can I help you? You can ask about:
-- Membership
-- Loans
-- Savings
-- Contact information
-- Working hours`
+Sunday: Closed`
+    },
+    'thanks': {
+      text: "You're welcome! Is there anything else I can help you with?",
+      quickActions: [
+        { text: 'Membership', action: 'link', value: `${baseUrl}/#membership`},
+        { text: 'Loans', action: 'link', value: `${baseUrl}/#apply`},
+        { text: 'Savings', action: 'link', value: `${baseUrl}/#services` }
+      ]
+    },
+    'help': { 
+      text: `How can I help you? Here are some options:`,
+      quickActions: [
+        { text: 'About Billways', action: 'question', value: 'What is Billways Sacco?' },
+        { text: 'Membership', action: 'question', value: 'How do I become a member?' },
+        { text: 'Loan Products', action: 'question', value: 'What loans do you offer?' },
+        { text: 'Contact', action: 'call', value: '0700032800' }
+      ]
+    },
+    'what is billways': {
+      text: `What is Billways Sacco Limited?
+Billways Sacco is a savings and credit cooperative society in Kenya that provides a range of financial solutions, including savings accounts, low-interest loans, and financial literacy programs, to empower its members and support their economic growth.`,
+      quickActions: [
+        { text: 'Join Us', action: 'link', value: '/#membership' },
+        { text: 'Our Services', action: 'question', value: 'What services do you offer?' }
+      ]
+    },
+    'location': {
+      text: `Where is Billways Sacco Limited located?
+Billways Sacco has its physical office located at LANGALANGA MARKET, Room 85, Nakuru, Kenya.`,
+      quickActions: [
+        { text: 'Directions', action: 'link', value: 'https://maps.google.com?q=Langalanga+Market,Nakuru' },
+        { text: 'Contact', action: 'call', value: '0700032800' }
+      ]
+    },
+    'become a member': {
+      text: `How can I become a member of Billways Sacco? What are the requirements?
+To become a member, you typically need to fulfill these requirements:
+
+1. Copy of National Identity Card
+2. Copy of KRA Pin certificate
+3. Membership fee (Ksh 700)
+4. Fully filled membership form
+5. Minimum share capital:
+   - Ksh 5,000 for individual members
+   - Ksh 10,000 for groups/micro members
+   - Ksh 15,000 for businesses/MSMEs
+
+Membership is open to eligible individuals, businesses, and MSMEs.`,
+      quickActions: [
+        { text: 'Apply Now', action: 'link', value: `${baseUrl}/#membership` },
+        { text: 'Download Form', action: 'link', value: '/membership-form' }
+      ]
+    },
+    'savings products': {
+      text: `What types of savings products does Billways Sacco offer?
+1. Fixed Deposits
+2. Junior Accounts
+3. Shared Capital Accounts
+4. Chama Accounts (Group savings)
+5. Benevolent Fund
+6. 52 weeks savings challenge
+7. Billways goal tiered saving account`,
+      quickActions: [
+        { text: 'Open Account', action: 'link', value: '/savings' },
+        { text: 'Rates', action: 'question', value: 'What are your savings rates?' }
+      ]
+    },
+    'loan products': {
+      text: `What are the different loan products available at Billways Sacco?
+1. Normal loan
+2. Development Loan
+3. School Fees Loan
+4. Emergency Loan
+5. Asset Financing Loan
+6. Salary Advance
+7. Group Loans
+8. Business loans
+9. Mama Mboga loan
+10. Boda boda loan
+11. Agri business loan
+12. Health loan`,
+      quickActions: [
+        { text: 'Apply Now', action: 'link', value: '/#apply' },
+        { text: 'Requirements', action: 'question', value: 'What are the loan requirements?' }
+      ]
+    },
+    'apply for loan': {
+      text: `How do I apply for a loan at Billways Sacco?
+To apply for a loan, you typically need to:
+1. Fill out a loan application form
+2. Provide required documents:
+   - Current payslip (for salaried individuals)
+   - Sufficient guarantors
+   - Logbook (for vehicles/motorbikes)
+   - Title deed (where applicable)
+3. Ensure your membership and deposit contributions meet the loan's eligibility criteria`,
+      quickActions: [
+        { text: 'Loan Form', action: 'link', value: `${baseUrl}/#apply` },
+        { text: 'Eligibility', action: 'question', value: 'What are the loan eligibility criteria?' }
+      ]
+    },
+    'deposit money': {
+      text: `How do I deposit money into my Billways Sacco account?
+You can deposit through:
+1. M-Pesa Paybill: Business Number 400200, Account Number 841698
+2. Direct bank deposits
+3. Standing orders through banks`,
+      quickActions: [
+        { text: 'Paybill Help', action: 'question', value: 'How do I use the M-Pesa paybill?' },
+        { text: 'Bank Details', action: 'question', value: 'What are your bank details?' }
+      ]
+    },
+    'withdraw funds': {
+      text: `What is the process for withdrawing funds from Billways Sacco?
+For withdrawals, especially from non-withdrawable deposit savings accounts:
+- A notice period of 60 days is often required
+- Shares are generally not withdrawable but can be transferred to another member`,
+      quickActions: [
+        { text: 'Withdrawal Form', action: 'link', value: '/withdrawal-form' },
+        { text: 'Contact', action: 'call', value: '0700032800' }
+      ]
+    },
+    'dividends': {
+      text: `How are dividends and interest on deposits (rebates) handled at Billways Sacco?
+- Dividends on shares and interest on savings (rebates) are determined by management
+- Approved by the Board of Directors
+- Confirmed at the Annual General Meeting
+- Financial performance and liquidity influence payouts
+- Unclaimed dividends may be forwarded to the Unclaimed Assets Authority after a period`,
+      quickActions: [
+        { text: 'Financial Report', action: 'link', value: '/financial-reports' },
+        { text: 'AGM Details', action: 'question', value: 'When is the next AGM?' }
+      ]
+    },
+    'regulated': {
+      text: `Is Billways Sacco regulated and by whom?
+Billways Sacco operates under the regulatory framework of the commissioner of cooperatives which supervises SACCOs in Kenya to ensure compliance and protect members.`,
+      quickActions: [
+        { text: 'Compliance', action: 'question', value: 'What compliance standards do you follow?' }
+      ]
+    }
   };
 
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -129,20 +315,36 @@ Sunday: Closed`,
     setShowHelpBubble(false);
   };
 
-  const sendMessage = async () => {
-    if (!question.trim()) return;
+  const handleQuickAction = (action: QuickAction) => {
+    if (action.action === 'question') {
+      setQuestion(action.value);
+      sendMessage(action.value);
+    } else if (action.action === 'call') {
+      window.open(`tel:${action.value}`, '_blank');
+    } else if (action.action === 'link') {
+      window.open(action.value, '_blank');
+    }
+  };
 
-    const userMessage: Message = { sender: 'user', text: question };
+  const sendMessage = async (customQuestion?: string) => {
+    const questionToSend = customQuestion || question;
+    if (!questionToSend.trim()) return;
+
+    const userMessage: Message = { sender: 'user', text: questionToSend };
     setMessages((prev) => [...prev, userMessage]);
-    setQuestion('');
+    if (!customQuestion) setQuestion('');
     setLoading(true);
 
     // Check for common questions first
-    const lowerQuestion = question.toLowerCase();
+    const lowerQuestion = questionToSend.toLowerCase();
     for (const [key, response] of Object.entries(commonQuestions)) {
       if (lowerQuestion.includes(key)) {
         setTimeout(() => {
-          setMessages(prev => [...prev, { sender: 'bot', text: response }]);
+          setMessages(prev => [...prev, { 
+            sender: 'bot', 
+            text: response.text,
+            quickActions: response.quickActions 
+          }]);
           setLoading(false);
         }, 800);
         return;
@@ -159,9 +361,17 @@ Sunday: Closed`,
             messages: [
               {
                 role: 'system',
-                content: `You are Billways Assistant, the official AI chatbot for Billways Sacco Limited. Respond professionally and helpfully using these brand colors: Green (#4CAF50) and Purple (#7B1FA2).`
+                content: `You are Billways Assistant, the official AI chatbot for Billways Sacco Limited. Respond professionally and helpfully using these brand colors: Green (#4CAF50) and Purple (#7B1FA2). 
+                
+                Important information about Billways Sacco:
+                - Location: Langalanga Market, Room 85, Nakuru, Kenya
+                - Contacts: 0700032800, info@billwayssacco.co.ke
+                - Services: Savings accounts, loans, financial education
+                
+                Format responses clearly without using markdown symbols like ** or *. 
+                Include relevant quick actions when appropriate (membership, loans, savings, contact).`
               },
-              { role: 'user', content: question }
+              { role: 'user', content: questionToSend }
             ],
             temperature: 0.7,
             max_tokens: 500
@@ -176,12 +386,40 @@ Sunday: Closed`,
         );
 
         const botReply = response.data.choices[0].message.content;
-        setMessages((prev) => [...prev, { sender: 'bot', text: botReply }]);
+        
+        // Add quick actions for certain responses
+        let quickActions: QuickAction[] = [];
+        if (botReply.toLowerCase().includes('member') || botReply.toLowerCase().includes('join')) {
+          quickActions = [
+            { text: 'Join Now', action: 'link', value: '/#membership' },
+            { text: 'Requirements', action: 'question', value: 'What are the membership requirements?' }
+          ];
+        } else if (botReply.toLowerCase().includes('loan')) {
+          quickActions = [
+            { text: 'Apply Now', action: 'link', value: '/loans' },
+            { text: 'Loan Products', action: 'question', value: 'What loan products do you offer?' }
+          ];
+        } else if (botReply.toLowerCase().includes('contact') || botReply.toLowerCase().includes('call')) {
+          quickActions = [
+            { text: 'Call Now', action: 'call', value: '0700032800' },
+            { text: 'WhatsApp', action: 'link', value: 'https://wa.me/254700032800' }
+          ];
+        }
+
+        setMessages((prev) => [...prev, { 
+          sender: 'bot', 
+          text: botReply,
+          quickActions 
+        }]);
       } catch (error) {
         console.error('API Error:', error);
         setMessages(prev => [...prev, { 
           sender: 'bot', 
-          text: `I'm having trouble connecting to our services. For immediate assistance:\n\n📞 0700032800\n📧 info@billwayssacco.co.ke` 
+          text: `I'm having trouble connecting to our services. For immediate assistance:\n\n📞 0700032800\n📧 info@billwayssacco.co.ke`,
+          quickActions: [
+            { text: 'Call Now', action: 'call', value: '0700032800' },
+            { text: 'WhatsApp', action: 'link', value: 'https://wa.me/254700032800' }
+          ]
         }]);
       } finally {
         setLoading(false);
@@ -191,7 +429,12 @@ Sunday: Closed`,
       setTimeout(() => {
         setMessages(prev => [...prev, { 
           sender: 'bot', 
-          text: `I can't process complex queries right now. Please contact us directly:\n\n📞 0700032800\n📧 info@billwayssacco.co.ke\n\nOr ask about:\n- Membership\n- Loans\n- Savings\n- Contact info` 
+          text: `I can't process complex queries right now. Please contact us directly:\n\n📞 0700032800\n📧 info@billwayssacco.co.ke\n\nOr ask about:\n- Membership\n- Loans\n- Savings\n- Contact info`,
+          quickActions: [
+            { text: 'Membership', action: 'link', value: '#membership' },
+            { text: 'Loans', action: 'link', value: '/loans' },
+            { text: 'Call Us', action: 'call', value: '0700032800' }
+          ]
         }]);
         setLoading(false);
       }, 1000);
@@ -259,20 +502,58 @@ Sunday: Closed`,
                     <li>What are your working hours?</li>
                     <li>How can I contact you?</li>
                   </ul>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button 
+                      onClick={() => handleQuickAction({ text: 'Membership', action: 'question', value: 'How do I become a member?' })}
+                      className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm hover:bg-green-200 transition"
+                    >
+                      Membership
+                    </button>
+                    <button 
+                      onClick={() => handleQuickAction({ text: 'Loans', action: 'question', value: 'What loans do you offer?' })}
+                      className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm hover:bg-purple-200 transition"
+                    >
+                      Loans
+                    </button>
+                    <button 
+                      onClick={() => handleQuickAction({ text: 'Contact', action: 'call', value: '0700032800' })}
+                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm hover:bg-blue-200 transition"
+                    >
+                      Contact Us
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
             {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`mb-3 p-3 rounded-lg max-w-[90%] ${msg.sender === 'user' 
-                  ? 'ml-auto bg-green-100 border border-green-200 text-gray-800' 
-                  : 'mr-auto bg-white border border-gray-200 shadow-sm text-gray-700'}`}
-              >
-                {msg.text.split('\n').map((line, j) => (
-                  <p key={j} className="mb-1 last:mb-0">{line}</p>
-                ))}
+              <div key={i}>
+                <div
+                  className={`mb-3 p-3 rounded-lg max-w-[90%] ${msg.sender === 'user' 
+                    ? 'ml-auto bg-green-100 border border-green-200 text-gray-800' 
+                    : 'mr-auto bg-white border border-gray-200 shadow-sm text-gray-700'}`}
+                >
+                  {msg.text.split('\n').map((line, j) => (
+                    <p key={j} className="mb-1 last:mb-0">{line}</p>
+                  ))}
+                </div>
+                {msg.quickActions && msg.sender === 'bot' && (
+                  <div className="flex flex-wrap gap-2 mb-3 ml-2">
+                    {msg.quickActions.map((action, k) => (
+                      <button
+                        key={k}
+                        onClick={() => handleQuickAction(action)}
+                        className={`px-3 py-1 rounded-full text-sm hover:opacity-90 transition ${
+                          action.action === 'call' ? 'bg-red-100 text-red-800' :
+                          action.action === 'link' ? 'bg-blue-100 text-blue-800' :
+                          'bg-purple-100 text-purple-800'
+                        }`}
+                      >
+                        {action.text}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
 
@@ -304,7 +585,7 @@ Sunday: Closed`,
                 disabled={loading}
               />
               <button
-                onClick={sendMessage}
+                onClick={() => sendMessage()}
                 disabled={loading || !question.trim()}
                 className="p-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white rounded transition-colors flex items-center justify-center"
                 style={{ minWidth: '40px' }}

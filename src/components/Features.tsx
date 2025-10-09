@@ -1,5 +1,8 @@
-
 import { CheckCircle } from "lucide-react";
+import community1 from "../assets/study-group-african-people.jpg";
+import community2 from "../assets/bodariders.jpg";
+import community3 from "../assets/scholar.jpg";
+import community4 from "../assets/sme.jpg";
 
 const Features = () => {
   const features = [
@@ -53,7 +56,7 @@ const Features = () => {
             <div className="md:w-1/2 mb-8 md:mb-0">
               <h3 className="text-2xl md:text-3xl font-bold mb-4 font-jakarta">Our Community Impact</h3>
               <p className="text-gray-600 mb-6">
-                For over 15 years, Billways Sacco has been more than a financial institution. We've been a pillar of community development, supporting:
+                For over 6 years, Billways Sacco has been more than a financial institution. We've been a pillar of community development, supporting:
               </p>
               <ul className="space-y-3 stagger-animation">
                 {["Education scholarships for deserving students", 
@@ -69,10 +72,34 @@ const Features = () => {
             </div>
             <div className="md:w-1/2 md:pl-10">
               <div className="grid grid-cols-2 gap-4 stagger-animation">
-                <div className="rounded-lg overflow-hidden shadow-sm aspect-[4/3] bg-gradient-to-br from-primary/80 to-primary hover-scale"></div>
-                <div className="rounded-lg overflow-hidden shadow-sm aspect-[4/3] bg-gradient-to-br from-secondary/80 to-secondary hover-scale"></div>
-                <div className="rounded-lg overflow-hidden shadow-sm aspect-[4/3] bg-gradient-to-br from-accent/80 to-accent hover-scale"></div>
-                <div className="rounded-lg overflow-hidden shadow-sm aspect-[4/3] bg-gradient-to-tr from-gray-800 to-gray-600 hover-scale"></div>
+              <div className="rounded-lg overflow-hidden shadow-sm aspect-[4/3] bg-gradient-to-br from-primary/80 to-primary hover-scale">
+                <img
+                  src={community1}
+                  alt="Community Impact 1"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="rounded-lg overflow-hidden shadow-sm aspect-[4/3] bg-gradient-to-br from-secondary/80 to-secondary hover-scale">
+                <img
+                  src={community2}
+                  alt="Community Impact 2"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="rounded-lg overflow-hidden shadow-sm aspect-[4/3] bg-gradient-to-br from-accent/80 to-accent hover-scale">
+                <img
+                  src={community3}
+                  alt="Community Impact 3"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="rounded-lg overflow-hidden shadow-sm aspect-[4/3] bg-gradient-to-tr from-gray-800 to-gray-600 hover-scale">
+                <img
+                  src={community4}
+                  alt="Community Impact 4"
+                  className="w-full h-full object-cover"
+                />
+              </div>
               </div>
             </div>
           </div>

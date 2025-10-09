@@ -1,25 +1,131 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Essential Meta -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Billways Sacco - Building Financial Freedom Together</title>
-    <meta name="description" content="Billways Sacco provides innovative financial solutions to help our members achieve their dreams through savings and affordable loans." />
-    <meta name="author" content="Billways Sacco" />
+    <title>Billways Sacco Kenya | Savings Accounts & Low-Interest Loans</title>
 
-    <meta property="og:title" content="Billways Sacco - Building Financial Freedom Together" />
-    <meta property="og:description" content="Billways Sacco provides innovative financial solutions to help our members achieve their dreams through savings and affordable loans." />
+    <!-- SEO Meta -->
+    <meta name="description" content="Join Billways Sacco Kenya for secure savings accounts, affordable business loans, and financial growth opportunities. Serving Nakuru and beyond with trusted cooperative banking." />
+    <meta name="keywords" content="Sacco Kenya, Savings Accounts Nakuru, Business Loans Kenya, Chama Accounts, Microfinance Kenya, Cooperative Banking, Financial Freedom Kenya" />
+    <meta name="author" content="Billways Sacco Limited" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://www.billwayssacco.co.ke/" />
+
+    <!-- Social Meta: Open Graph (Facebook, LinkedIn, etc.) -->
+    <meta property="og:title" content="Billways Sacco - Your Partner for Financial Growth in Kenya" />
+    <meta property="og:description" content="Access secure savings accounts and low-interest business loans. Join thousands of Kenyans building wealth through our cooperative banking solutions." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:url" content="https://www.billwayssacco.co.ke/" />
+    <meta property="og:image" content="https://www.billwayssacco.co.ke/assets/social-preview.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Billways Sacco Limited" />
 
+    <!-- Twitter Meta -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@billwayssacco" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:creator" content="@billwayssacco" />
+    <meta name="twitter:title" content="Billways Sacco Kenya | Savings & Loans for Growth" />
+    <meta name="twitter:description" content="Empowering Kenyan entrepreneurs and individuals with accessible financial services since 2015." />
+    <meta name="twitter:image" content="https://www.billwayssacco.co.ke/assets/twitter-preview.jpg" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+    <!-- Structured Data (JSON-LD for Google Rich Snippets) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CreditUnion",
+        "name": "Billways Sacco Limited",
+        "url": "https://www.billwayssacco.co.ke",
+        "logo": "https://www.billwayssacco.co.ke/assets/logo.svg",
+        "description": "A leading savings and credit cooperative in Kenya offering financial services to individuals and businesses.",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Langalanga Market, Room 85",
+          "addressLocality": "Nakuru",
+          "addressRegion": "Nakuru County",
+          "postalCode": "20100",
+          "addressCountry": "Kenya"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+254700032800",
+          "contactType": "customer service",
+          "email": "info@billwayssacco.co.ke",
+          "areaServed": "Kenya"
+        },
+        "sameAs": [
+          "https://twitter.com/billwayssacco",
+          "https://facebook.com/billwayssacco",
+          "https://instagram.com/billwayssacco"
+        ]
+      }
+    </script>
+
+    <!-- Preload Important Assets -->
+    <link rel="preload" href="/assets/logo.svg" as="image" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/your-font.woff2" as="font" type="font/woff2" crossorigin>
+    
+    <!-- Action Links (Visible in some crawlers) -->
+    <meta name="application-name" content="Billways Sacco Portal">
+    <meta name="msapplication-starturl" content="https://www.billwayssacco.co.ke/login">
+    <meta name="msapplication-task" content="name=Login;action-uri=/login;icon-uri=/assets/icons/login.ico">
+    <meta name="msapplication-task" content="name=Register;action-uri=/register;icon-uri=/assets/icons/register.ico">
+    <meta name="msapplication-task" content="name=Apply for Loan;action-uri=/loans;icon-uri=/assets/icons/loan.ico">
   </head>
 
   <body>
+    <!-- Hidden Action Links for SEO (also visible to screen readers) -->
+    <div hidden>
+      <a href="/register" aria-label="Register for Billways Sacco membership">Register Account</a>
+      <a href="/login" aria-label="Login to your Billways Sacco account">Member Login</a>
+      <a href="/savings" aria-label="Explore Billways Sacco savings products">Savings Accounts</a>
+      <a href="/loans/business" aria-label="Apply for a business loan">Business Loans</a>
+      <a href="/loans/personal" aria-label="Apply for a personal loan">Personal Loans</a>
+    </div>
+
     <div id="root"></div>
+
+    <!-- Schema Markup for Actions -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "https://www.billwayssacco.co.ke/",
+        "potentialAction": [
+          {
+            "@type": "SearchAction",
+            "target": "https://www.billwayssacco.co.ke/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          },
+          {
+            "@type": "RegisterAction",
+            "url": "https://www.billwayssacco.co.ke/register",
+            "description": "Register for a new membership account"
+          },
+          {
+            "@type": "LoginAction",
+            "url": "https://www.billwayssacco.co.ke/login",
+            "name": "Member Login"
+          }
+        ]
+      }
+    </script>
+
+     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TDWF0PGZ4V"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-TDWF0PGZ4V');
+    </script>
+    
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
